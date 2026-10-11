@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BYTE/STORE — Objects for Digital Labor</title>
+    <meta name="description" content="An experimental digital flagship showcasing high-throughput computer hardware and custom workstation engineering.">
+
+    <!-- Google Fonts: Syne, Instrument Serif, JetBrains Mono, Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Syne:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS v3 via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Three.js Library for Interactive 3D Exhibition -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bone: {
+                            DEFAULT: '#F0EFE9',
+                            dark: '#E2E0D7',
+                            light: '#F8F7F2',
+                            card: '#E8E6DF'
+                        },
+                        obsidian: {
+                            DEFAULT: '#0F1012',
+                            light: '#1A1C20',
+                            muted: '#52545A'
+                        },
+                        cobalt: {
+                            DEFAULT: '#294DFF',
+                            hover: '#1B3AE5',
+                            subtle: 'rgba(41, 77, 255, 0.08)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        display: ['"Syne"', 'sans-serif'],
+                        serif: ['"Instrument Serif"', 'serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    },
+                    boxShadow: {
+                        'raw': '4px 4px 0px 0px #0F1012',
+                        'raw-cobalt': '4px 4px 0px 0px #294DFF',
+                        'subtle-depth': '0 20px 40px -15px rgba(15, 16, 18, 0.07)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Fine Grain Canvas Overlay */
+        .grain-overlay {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Technical Grid Background */
+        .tech-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(15, 16, 18, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 16, 18, 0.05) 1px, transparent 1px);
+        }
+
+        /* Vertical Writing Mode for Navigation Rail */
+        .writing-vertical {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        /* Custom Minimal Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F0EFE9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0F1012;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #294DFF;
+        }
+
+        /* Hide scrollbars for smooth scroll containers */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Subtle Hover Image Zoom Mask */
+        .img-mask-container {
+            overflow: hidden;
+            position: relative;
+        }
+        .img-mask-container img {
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+        }
+        .img-mask-container:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            accent-color: #294DFF;
+        }
+    </style>
+</head>
+<body class="bg-bone text-obsidian font-sans antialiased selection:bg-cobalt selection:text-white min-h-screen relative overflow-x-hidden tech-grid grain-overlay">
+
+    <!-- Fixed Desktop Vertical Navigation Rail (Left Side) -->
+    <aside class="hidden lg:flex fixed left-0 top-0 bottom-0 w-16 bg-bone border-r border-obsidian/15 z-50 flex-col justify-between items-center py-8">
+        <!-- Brand Wordmark Vertical -->
+        <a href="#hero" class="group flex flex-col items-center gap-2">
+            <div class="w-8 h-8 bg-obsidian text-bone font-mono font-bold flex items-center justify-center text-xs group-hover:bg-cobalt transition-colors">
+                B/F
+            </div>
+            <span class="writing-vertical font-mono text-[10px] tracking-widest uppercase font-semibold text-obsidian/60 group-hover:text-obsidian transition-colors">
+                BYTE/FORM
+            </span>
+        </a>
+
+        <!-- Vertical Navigation Links -->
+        <nav class="flex flex-col items-center gap-8 font-mono text-xs font-medium tracking-wider">
+            <a href="#hero" class="nav-rail-item writing-vertical hover:text-cobalt transition-colors text-cobalt font-bold flex items-center gap-2" data-section="hero">
+                <span class="w-1.5 h-1.5 rounded-full bg-cobalt inline-block"></span>
+                00/HERO
+            </a>
+            <a href="#catalog" class="nav-rail-item writing-vertical text-obsidian/60 hover:text-cobalt transition-colors flex items-center gap-2" data-section="catalog">
+                01/INDEX
+            </a>
+            <a href="#anatomy" class="nav-rail-item writing-vertical text-obsidian/60 hover:text-cobalt transition-colors flex items-center gap-2" data-section="anatomy">
+                02/ANATOMY
+            </a>
+            <a href="#specs" class="nav-rail-item writing-vertical text-obsidian/60 hover:text-cobalt transition-colors flex items-center gap-2" data-section="specs">
+                03/SPECS
+            </a>
+            <a href="#contact" class="nav-rail-item writing-vertical text-obsidian/60 hover:text-cobalt transition-colors flex items-center gap-2" data-section="contact">
+                04/CONNECT
+            </a>
+        </nav>
+
+        <!-- Dynamic Coordinate Telemetry Display -->
+        <div class="writing-vertical font-mono text-[9px] text-obsidian/40 uppercase tracking-widest">
+            LAT 0.62° N &bull; LON 106.8° E
+        </div>
+    </aside>
+
+    <!-- Floating Top Header (Contains Studio Info & Rig Builder Trigger) -->
+    <header class="fixed top-0 left-0 lg:left-16 right-0 z-40 px-6 py-4 flex items-center justify-between pointer-events-none">
+        <!-- Live Status Pill -->
+        <div class="pointer-events-auto bg-bone/90 backdrop-blur-md border border-obsidian/20 px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-bold text-obsidian">BYTESTORE</span>
+            <span class="text-obsidian/40 hidden sm:inline">| TECHNICAL EXHIBITION &bull; 2026 EDITION</span>
+        </div>
+
+        <!-- Action Buttons: Build Drawer & Mobile Menu Trigger -->
+        <div class="pointer-events-auto flex items-center gap-3">
+            <button onclick="toggleBuildDrawer()" class="px-4 py-2 bg-obsidian hover:bg-cobalt text-bone font-mono text-xs font-bold tracking-wider uppercase flex items-center gap-2 transition-all shadow-raw hover:shadow-raw-cobalt hover:-translate-x-0.5 hover:-translate-y-0.5">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">BUILD RIG</span>
+                <span id="rigCounterBadge" class="bg-cobalt text-white text-[10px] px-1.5 py-0.5 font-mono font-bold rounded-sm ml-1">0</span>
+            </button>
+
+            <button onclick="toggleMobileMenu()" class="lg:hidden p-2 bg-bone border border-obsidian text-obsidian" aria-label="Toggle Navigation">
+                <i data-lucide="menu" id="menuIcon" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Floating Navigation Dock -->
+    <div id="mobileDock" class="lg:hidden fixed bottom-4 left-4 right-4 z-40 bg-obsidian text-bone p-3 border border-obsidian flex items-center justify-around font-mono text-[11px] font-bold shadow-2xl">
+        <a href="#hero" class="hover:text-cobalt transition-colors flex items-center gap-1">00/HERO</a>
+        <a href="#catalog" class="hover:text-cobalt transition-colors flex items-center gap-1">01/INDEX</a>
+        <a href="#anatomy" class="hover:text-cobalt transition-colors flex items-center gap-1">02/3D</a>
+        <a href="#specs" class="hover:text-cobalt transition-colors flex items-center gap-1">03/SPECS</a>
+        <a href="#contact" class="hover:text-cobalt transition-colors flex items-center gap-1">04/CONTACT</a>
+    </div>
+
+    <!-- Main Content Wrapper (Shifted right on desktop to accommodate rail) -->
+    <main class="lg:pl-16 min-h-screen">
+
+        <!-- SECTION 00: HERO EXHIBITION -->
+        <section id="hero" class="min-h-screen relative border-b border-obsidian/15 pt-24 pb-12 px-6 lg:px-12 flex flex-col justify-between overflow-hidden">
+            
+            <!-- Hero Top Editorial Headline -->
+            <div class="max-w-7xl mx-auto w-full pt-4">
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-obsidian/10 pb-8">
+                    <div class="space-y-2">
+                        <div class="font-mono text-xs font-bold text-cobalt uppercase tracking-widest flex items-center gap-2">
+                            <span class="inline-block w-2 h-2 bg-cobalt"></span>
+                            CATALOGUE REVISION 2.4 / EXPERIMENTAL INDUSTRIAL DESIGN
+                        </div>
+                        <h1 class="font-display font-extrabold text-5xl sm:text-7xl lg:text-8xl tracking-tight text-obsidian uppercase leading-[0.9]">
+                            HARDWARE <br>
+                            <span class="font-serif italic font-normal text-cobalt border-b-2 border-cobalt inline-block pb-1">WITH INTENT.</span>
+                        </h1>
+                    </div>
+                    
+                    <div class="max-w-md space-y-4 font-mono text-xs text-obsidian/70">
+                        <p class="leading-relaxed">
+                            A curated flagship catalog for computer hardware engineered for high-throughput digital labor, CAD rendering, and competitive gaming precision.
+                        </p>
+                        <div class="flex items-center gap-4 text-[11px]">
+                            <span class="px-2 py-1 bg-obsidian text-bone font-bold">100% ORIGINAL</span>
+                            <span class="px-2 py-1 bg-bone-dark text-obsidian border border-obsidian/20">PORTFOLIO DEMO CONCEPT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Interactive 3D Canvas & Spec Telemetry Overlay -->
+            <div class="max-w-7xl mx-auto w-full my-8 relative h-[420px] sm:h-[500px] lg:h-[580px] bg-bone-card border border-obsidian/20 shadow-subtle-depth overflow-hidden group">
+                
+                <!-- WebGL 3D Canvas Container -->
+                <div id="threeHeroCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+                <!-- 3D Interactive HUD Controls Overlay -->
+                <div class="absolute top-4 left-4 z-10 font-mono text-[11px] bg-bone/90 backdrop-blur-sm border border-obsidian/15 p-3 space-y-2 max-w-xs pointer-events-auto">
+                    <div class="flex items-center justify-between border-b border-obsidian/10 pb-1.5">
+                        <span class="font-bold text-obsidian flex items-center gap-1.5">
+                            <i data-lucide="box" class="w-3.5 h-3.5 text-cobalt"></i>
+                            EXHIBIT: CYBER-RIG MK-IV
+                        </span>
+                        <span class="text-cobalt font-bold">3D REALTIME</span>
+                    </div>
+                    <p class="text-[10px] text-obsidian/60 leading-tight">
+                        Drag to orbit 3D mechanical frame. Toggle exploded view to inspect internal cooling blocks and GPU node.
+                    </p>
+                    <div class="pt-1 flex gap-2">
+                        <button id="toggleExplodeBtn" onclick="toggle3DExplode()" class="px-2.5 py-1 bg-cobalt text-white font-bold hover:bg-obsidian transition-colors text-[10px]">
+                            EXPLODE ASSEMBLY
+                        </button>
+                        <button id="toggleWireframeBtn" onclick="toggle3DWireframe()" class="px-2.5 py-1 bg-bone-dark border border-obsidian/30 text-obsidian font-bold hover:bg-obsidian hover:text-bone transition-colors text-[10px]">
+                            WIREFRAME
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Component Telemetry Overlay Right -->
+                <div class="hidden sm:block absolute bottom-4 right-4 z-10 font-mono text-[10px] bg-obsidian text-bone p-4 border border-obsidian/30 space-y-2 max-w-xs">
+                    <div class="text-cobalt font-bold tracking-wider uppercase flex items-center gap-1">
+                        <i data-lucide="activity" class="w-3 h-3"></i> SYSTEM TELEMETRY
+                    </div>
+                    <div class="space-y-1 text-bone/80">
+                        <div class="flex justify-between"><span>THERMAL STATE:</span> <span class="text-emerald-400 font-bold">38°C OPTIMAL</span></div>
+                        <div class="flex justify-between"><span>VAPOR CHAMBER:</span> <span class="text-bone">ACTIVE LIQUID</span></div>
+                        <div class="flex justify-between"><span>CHASSIS FINISH:</span> <span class="text-bone">CNC TITANIUM</span></div>
+                        <div class="flex justify-between"><span>BUS SPEED:</span> <span class="text-cobalt font-bold">PCIe 5.0 x16</span></div>
+                    </div>
+                </div>
+
+                <!-- Canvas Bottom Hint Bar -->
+                <div class="absolute bottom-4 left-4 z-10 font-mono text-[10px] text-obsidian/50 flex items-center gap-2">
+                    <i data-lucide="move-3d" class="w-4 h-4 text-cobalt"></i>
+                    <span>INTERACTIVE THREE.JS VIEWPORT &bull; ROTATE & EXPLODE</span>
+                </div>
+            </div>
+
+            <!-- Hero Section Footer Quick Index -->
+            <div class="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs border-t border-obsidian/10 pt-4">
+                <div class="flex items-center gap-6">
+                    <div><span class="text-obsidian/40">FEATURED:</span> <strong class="text-obsidian font-bold">RTX 4080 SUPER RIG</strong></div>
+                    <div><span class="text-obsidian/40">BUILD TIME:</span> <strong class="text-cobalt font-bold">48 HOURS</strong></div>
+                </div>
+                <a href="#catalog" class="inline-flex items-center gap-2 font-bold text-cobalt hover:text-obsidian transition-colors">
+                    EXPLORE HARDWARE INDEX <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- SECTION 01: OBJECT INDEX / HARDWARE CATALOGUE -->
+        <section id="catalog" class="py-20 px-6 lg:px-12 border-b border-obsidian/15 max-w-7xl mx-auto">
+            
+            <!-- Section Title & Filter Controls -->
+            <div class="space-y-8 mb-12">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <div class="font-mono text-xs font-bold text-cobalt uppercase tracking-widest mb-1 flex items-center gap-2">
+                            <span>01 / ARCHIVE INDEX</span>
+                        </div>
+                        <h2 class="font-display font-extrabold text-4xl sm:text-5xl text-obsidian uppercase">
+                            SELECTED OBJECTS.
+                        </h2>
+                    </div>
+
+                    <!-- Search Input Field -->
+                    <div class="w-full md:w-80 relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-obsidian/40 pointer-events-none"></i>
+                        <input type="text" 
+                               id="searchInput" 
+                               placeholder="FILTER BY SPEC / NAME..." 
+                               oninput="handleSearchInput()"
+                               class="w-full pl-10 pr-8 py-2.5 bg-bone-light border border-obsidian/30 font-mono text-xs text-obsidian placeholder-obsidian/40 focus:outline-none focus:border-cobalt focus:ring-1 focus:ring-cobalt">
+                        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-obsidian/50 hover:text-obsidian">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Pills & Sorting Controls Bar -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-obsidian/10">
+                    <!-- Category Filter Buttons -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar" id="categoryContainer">
+                        <!-- Populated by JavaScript -->
+                    </div>
+
+                    <!-- Sort Select Dropdown -->
+                    <div class="flex items-center gap-2 shrink-0 font-mono text-xs">
+                        <span class="text-obsidian/50">SORT BY:</span>
+                        <select id="sortSelect" onchange="handleSortChange()" class="bg-bone-light border border-obsidian/30 px-3 py-1.5 font-mono text-xs text-obsidian focus:outline-none focus:border-cobalt font-semibold">
+                            <option value="featured">00 // RECOMMENDED</option>
+                            <option value="price-asc">01 // PRICE: LOW &rarr; HIGH</option>
+                            <option value="price-desc">02 // PRICE: HIGH &rarr; LOW</option>
+                            <option value="name-asc">03 // ALPHABETICAL A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Results Counter -->
+            <div id="catalogStatsBar" class="mb-6 flex items-center justify-between font-mono text-xs text-obsidian/60 border-b border-obsidian/10 pb-2">
+                <span>INDEX MATCHES: <strong id="productCount" class="text-cobalt font-bold">0</strong> OBJECTS</span>
+                <span id="activeFilterBadge" class="hidden text-cobalt font-bold uppercase"></span>
+            </div>
+
+            <!-- Asymmetric Editorial Product Catalogue Grid -->
+            <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Products dynamically injected via JavaScript -->
+            </div>
+
+            <!-- Empty Search Results State -->
+            <div id="emptyState" class="hidden py-20 text-center space-y-4 bg-bone-card border border-obsidian/15 p-8">
+                <i data-lucide="slash" class="w-10 h-10 text-obsidian/30 mx-auto"></i>
+                <h3 class="font-display font-bold text-xl text-obsidian">NO HARDWARE MATCHED YOUR CRITERIA</h3>
+                <p class="font-mono text-xs text-obsidian/60 max-w-sm mx-auto">Adjust your keywords or reset active category filters to inspect full hardware archive.</p>
+                <button onclick="resetFilters()" class="px-5 py-2.5 bg-obsidian text-bone font-mono text-xs font-bold hover:bg-cobalt transition-colors">
+                    RESET ALL FILTERS
+                </button>
+            </div>
+
+        </section>
+
+        <!-- SECTION 02: HARDWARE ANATOMY & INTERACTIVE SPEC INSPECTOR -->
+        <section id="anatomy" class="py-20 px-6 lg:px-12 border-b border-obsidian/15 max-w-7xl mx-auto">
+            
+            <div class="mb-12">
+                <div class="font-mono text-xs font-bold text-cobalt uppercase tracking-widest mb-1">
+                    02 / TECHNICAL ANATOMY
+                </div>
+                <h2 class="font-display font-extrabold text-4xl sm:text-5xl text-obsidian uppercase">
+                    DISSECTING PERFORMANCE.
+                </h2>
+                <p class="font-mono text-xs text-obsidian/60 max-w-xl mt-2">
+                    An interactive material breakdown of custom workstation architectures and peripheral construction standards.
+                </p>
+            </div>
+
+            <!-- Interactive Exploded Anatomy Visual Deck -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-bone-card border border-obsidian/20 p-6 sm:p-10 shadow-subtle-depth">
+                
+                <!-- Anatomy Component Hotspot View (Left Visual) -->
+                <div class="lg:col-span-7 relative h-80 sm:h-[450px] bg-obsidian text-bone overflow-hidden flex items-center justify-center p-6 border border-obsidian">
+                    
+                    <img id="anatomyImage" 
+                         src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?q=80&w=1000&auto=format&fit=crop" 
+                         alt="Custom Computer Rig Anatomy" 
+                         class="w-full h-full object-cover opacity-80 mix-blend-luminosity">
+
+                    <!-- Interactive Component Hotspot 1: Vapor Chamber -->
+                    <button onclick="inspectHotspot('hotspot1')" class="absolute top-1/3 left-1/3 w-7 h-7 rounded-full bg-cobalt text-white font-mono font-bold text-xs flex items-center justify-center border-2 border-white shadow-lg animate-bounce hover:scale-125 transition-transform" title="Vapor Chamber Cooling">
+                        01
+                    </button>
+
+                    <!-- Interactive Component Hotspot 2: GPU Core -->
+                    <button onclick="inspectHotspot('hotspot2')" class="absolute top-1/2 right-1/3 w-7 h-7 rounded-full bg-cobalt text-white font-mono font-bold text-xs flex items-center justify-center border-2 border-white shadow-lg animate-bounce hover:scale-125 transition-transform" style="animation-delay: 0.2s" title="RTX Core Die">
+                        02
+                    </button>
+
+                    <!-- Interactive Component Hotspot 3: DDR5 Power Delivery -->
+                    <button onclick="inspectHotspot('hotspot3')" class="absolute bottom-1/3 left-1/2 w-7 h-7 rounded-full bg-cobalt text-white font-mono font-bold text-xs flex items-center justify-center border-2 border-white shadow-lg animate-bounce hover:scale-125 transition-transform" style="animation-delay: 0.4s" title="High-Speed Bus">
+                        03
+                    </button>
+
+                    <div class="absolute bottom-3 left-3 bg-obsidian/80 backdrop-blur-md px-3 py-1 font-mono text-[10px] text-cobalt border border-cobalt/30">
+                        CLICK NUMBERS TO INSPECT TELEMETRY
+                    </div>
+                </div>
+
+                <!-- Hotspot Dynamic Inspector Readout (Right Info Panel) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="border-b border-obsidian/15 pb-4">
+                        <span id="hotspotCode" class="font-mono text-xs font-bold text-cobalt tracking-widest uppercase">COMPONENT // 01</span>
+                        <h3 id="hotspotTitle" class="font-display font-bold text-2xl text-obsidian mt-1">
+                            VAPOR CHAMBER LIQUID COOLING
+                        </h3>
+                    </div>
+
+                    <p id="hotspotDesc" class="font-mono text-xs text-obsidian/70 leading-relaxed bg-bone-light p-4 border border-obsidian/10">
+                        Patented dual-phase liquid evaporation chamber dissipating thermal pressure up to 450W TDP, sustaining peak boost clock speeds during extended computational workloads.
+                    </p>
+
+                    <!-- Technical Specs Data Sheet -->
+                    <div class="space-y-2 font-mono text-xs">
+                        <div class="flex justify-between border-b border-obsidian/10 pb-1.5">
+                            <span class="text-obsidian/50">MATERIAL GRADE:</span>
+                            <span id="hotspotParam1" class="font-bold text-obsidian">99.9% Electrolytic Copper</span>
+                        </div>
+                        <div class="flex justify-between border-b border-obsidian/10 pb-1.5">
+                            <span class="text-obsidian/50">THERMAL RATING:</span>
+                            <span id="hotspotParam2" class="font-bold text-cobalt">14.8 W/m-K Conductive</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-obsidian/50">TOLERANCE:</span>
+                            <span id="hotspotParam3" class="font-bold text-obsidian">±0.005mm CNC Machined</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <a href="#catalog" class="inline-flex items-center gap-2 text-xs font-mono font-bold text-obsidian hover:text-cobalt transition-colors">
+                            BROWSE COMPATIBLE RIGS <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 03: TECHNICAL SPECIFICATION MATRIX -->
+        <section id="specs" class="py-20 px-6 lg:px-12 border-b border-obsidian/15 max-w-7xl mx-auto">
+            
+            <div class="mb-12">
+                <div class="font-mono text-xs font-bold text-cobalt uppercase tracking-widest mb-1">
+                    03 / HARDWARE MATRIX
+                </div>
+                <h2 class="font-display font-extrabold text-4xl sm:text-5xl text-obsidian uppercase">
+                    TECHNICAL STANDARDS.
+                </h2>
+            </div>
+
+            <!-- Editorial Matrix Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Stat Block 1 -->
+                <div class="p-8 bg-bone-card border border-obsidian/20 space-y-4 hover:border-cobalt transition-colors group">
+                    <div class="font-display font-extrabold text-5xl text-cobalt group-hover:translate-x-1 transition-transform">
+                        100%
+                    </div>
+                    <h3 class="font-display font-bold text-lg text-obsidian">AUTHENTIC GUARANTEE</h3>
+                    <p class="font-mono text-xs text-obsidian/60 leading-relaxed">
+                        Sourced directly from authorized Indonesian distributors with full manufacturer warranty registration and technical support.
+                    </p>
+                </div>
+
+                <!-- Stat Block 2 -->
+                <div class="p-8 bg-bone-card border border-obsidian/20 space-y-4 hover:border-cobalt transition-colors group">
+                    <div class="font-display font-extrabold text-5xl text-obsidian group-hover:translate-x-1 transition-transform">
+                        72 HR
+                    </div>
+                    <h3 class="font-display font-bold text-lg text-obsidian">STRESS TEST BENCH</h3>
+                    <p class="font-mono text-xs text-obsidian/60 leading-relaxed">
+                        Every custom build undergoes rigorous thermal imaging, Cinebench loops, and MemTest86 stability validation prior to dispatch.
+                    </p>
+                </div>
+
+                <!-- Stat Block 3 -->
+                <div class="p-8 bg-bone-card border border-obsidian/20 space-y-4 hover:border-cobalt transition-colors group">
+                    <div class="font-display font-extrabold text-5xl text-cobalt group-hover:translate-x-1 transition-transform">
+                        0.00s
+                    </div>
+                    <h3 class="font-display font-bold text-lg text-obsidian">CONSULTATION LATENCY</h3>
+                    <p class="font-mono text-xs text-obsidian/60 leading-relaxed">
+                        Direct engineer-to-client consultation via WhatsApp for custom hardware selection based on specific rendering software requirements.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 04: DIRECT DIRECTORY & CONTACT -->
+        <section id="contact" class="py-20 px-6 lg:px-12 max-w-7xl mx-auto">
+            
+            <div class="bg-obsidian text-bone p-8 sm:p-16 border border-obsidian space-y-8 relative overflow-hidden">
+                <div class="max-w-2xl space-y-4 relative z-10">
+                    <span class="font-mono text-xs font-bold text-cobalt tracking-widest uppercase">
+                        04 / DIRECT CONSULTATION & ORDERING
+                    </span>
+                    <h2 class="font-display font-extrabold text-4xl sm:text-6xl uppercase leading-tight">
+                        READY TO BUILD YOUR MACHINE?
+                    </h2>
+                    <p class="font-mono text-xs text-bone/70 leading-relaxed">
+                        Contact our lead hardware technician directly via WhatsApp for custom spec planning, inventory confirmation, or portfolio inquiry.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 relative z-10">
+                    <button onclick="openWhatsAppConsultation()" class="px-8 py-4 bg-cobalt hover:bg-white hover:text-obsidian text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-3 transition-colors shadow-raw-cobalt">
+                        <i data-lucide="message-square" class="w-4 h-4"></i>
+                        OPEN DIRECT WHATSAPP CONSULTATION
+                    </button>
+                    <a href="#catalog" class="px-8 py-4 border border-bone/30 hover:border-bone text-bone font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors">
+                        INSPECT CATALOG AGAIN
+                    </a>
+                </div>
+
+                <!-- Portfolio Student Disclosure Footer Banner inside dark box -->
+                <div class="pt-8 border-t border-bone/15 font-mono text-[11px] text-bone/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 relative z-10">
+                    <span>PORTFOLIO CONCEPT &bull; INFORMATICS ENGINEERING SHOWCASE</span>
+                    <span>WHATSAPP INTEGRATION ACTIVE</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Footer Section -->
+        <footer class="border-t border-obsidian/15 py-12 px-6 lg:px-12 font-mono text-xs text-obsidian/60 bg-bone">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div class="space-y-1">
+                    <span class="font-bold text-obsidian uppercase">BYTESTORE TECHNICAL FLAGSHIP</span>
+                    <p class="text-[11px]">&copy; 2026 BYTESTORE HARDWARE LABS. ALL RIGHTS RESERVED.</p>
+                </div>
+                <div class="flex flex-wrap gap-6 text-[11px]">
+                    <a href="#hero" class="hover:text-cobalt">00/HERO</a>
+                    <a href="#catalog" class="hover:text-cobalt">01/ARCHIVE</a>
+                    <a href="#anatomy" class="hover:text-cobalt">02/ANATOMY</a>
+                    <a href="#specs" class="hover:text-cobalt">03/SPECS</a>
+                    <a href="#contact" class="hover:text-cobalt">04/CONTACT</a>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Product Detail Modal Overlay -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-obsidian/80 backdrop-blur-md transition-opacity duration-300 opacity-0" role="dialog" aria-modal="true" onclick="handleModalBackdropClick(event)">
+        <div class="relative w-full max-w-3xl bg-bone border-2 border-obsidian shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col" id="modalContainer">
+            
+            <!-- Modal Header Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-20 p-2 bg-obsidian text-bone hover:bg-cobalt transition-colors" title="Close Modal">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Modal Content (Dynamically Populated) -->
+            <div id="modalBody" class="overflow-y-auto p-6 sm:p-10 space-y-6">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom PC Rig Build Estimator Side Drawer Overlay -->
+    <div id="buildDrawer" class="fixed inset-0 z-50 hidden transition-opacity duration-300 opacity-0" onclick="handleDrawerBackdropClick(event)">
+        <div class="absolute inset-0 bg-obsidian/70 backdrop-blur-sm"></div>
+        
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-bone border-l-2 border-obsidian shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="drawerContainer">
+            
+            <!-- Drawer Header -->
+            <div class="p-6 border-b border-obsidian/15 flex items-center justify-between bg-bone-dark">
+                <div class="flex items-center gap-2 font-mono">
+                    <i data-lucide="cpu" class="w-5 h-5 text-cobalt"></i>
+                    <h3 class="font-bold text-obsidian text-sm uppercase">CUSTOM RIG ESTIMATOR</h3>
+                </div>
+                <button onclick="toggleBuildDrawer()" class="p-1.5 text-obsidian hover:text-cobalt">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Drawer Build Items Container -->
+            <div id="buildListItems" class="flex-grow overflow-y-auto p-6 space-y-4">
+                <!-- Items populated by JavaScript -->
+            </div>
+
+            <!-- Drawer Footer Summary -->
+            <div class="p-6 border-t border-obsidian/15 bg-obsidian text-bone space-y-4 font-mono">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-bone/60">ESTIMATED TOTAL COST:</span>
+                    <span id="buildTotalPrice" class="font-bold text-cobalt text-lg">Rp 0</span>
+                </div>
+                
+                <button onclick="sendBuildWhatsAppOrder()" id="checkoutBuildBtn" class="w-full py-4 bg-cobalt hover:bg-white hover:text-obsidian text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    EXPORT RIG TO WHATSAPP ORDER
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * BYTESTORE TECHNICAL FLAGSHIP EXPERIMENTAL APPLICATION
+         * Vanilla ES6 JavaScript & Three.js 3D Viewport Engine
+         */
+
+        // Global Configuration
+        const CONFIG = {
+            whatsappNumber: "6283125726235", // Updated WhatsApp contact number (083125726235)
+            storeName: "ByteStore Hardware Labs"
+        };
+
+        // Curated Hardware Dataset (Expanded Multi-Brand IT Catalog)
+        const PRODUCTS_DATA = [
+            // Laptops & Workstations
+            {
+                id: "p1",
+                name: "ASUS ROG Zephyrus G16 (2026)",
+                category: "laptop",
+                categoryLabel: "WORKSTATION LAPTOP",
+                price: 34999000,
+                originalPrice: 36999000,
+                tag: "FLAGSHIP",
+                image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    processor: "Intel Core Ultra 9 185H",
+                    gpu: "NVIDIA GeForce RTX 4080 12GB",
+                    ram: "32GB LPDDR5X 7467MHz",
+                    storage: "2TB PCIe 4.0 NVMe SSD",
+                    display: "16\" OLED 2.5K 240Hz 0.2ms"
+                },
+                description: "Ultra-precise CNC aluminum mobile workstation featuring Nebula OLED 240Hz color-calibrated display for CAD engineering and high-framerate computing.",
+                stock: 4,
+                isPopular: true
+            },
+            {
+                id: "p2",
+                name: "Lenovo Legion Pro 7i Gen 9",
+                category: "laptop",
+                categoryLabel: "WORKSTATION LAPTOP",
+                price: 42500000,
+                originalPrice: 45000000,
+                tag: "HEAVY DUTY",
+                image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    processor: "Intel Core i9-14900HX",
+                    gpu: "NVIDIA GeForce RTX 4090 16GB",
+                    ram: "64GB DDR5 5600MHz",
+                    storage: "2TB NVMe PCIe Gen4 SSD",
+                    display: "16\" WQXGA 240Hz PureSight Gaming"
+                },
+                description: "Extreme cooling thermal chamber chassis coupled with AI Engine+ for peak sustained CPU & GPU power limits.",
+                stock: 3,
+                isPopular: true
+            },
+            {
+                id: "p3",
+                name: "Apple MacBook Pro 16\" M3 Max",
+                category: "laptop",
+                categoryLabel: "CREATIVE WORKSTATION",
+                price: 58999000,
+                originalPrice: 61999000,
+                tag: "APPLE SILICON",
+                image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    processor: "Apple M3 Max (16-Core CPU, 40-Core GPU)",
+                    ram: "48GB Unified Memory",
+                    storage: "1TB High-Speed SSD",
+                    display: "16.2\" Liquid Retina XDR 120Hz ProMotion",
+                    battery: "Up to 22 Hours Battery Life"
+                },
+                description: "Industry-standard liquid retina rendering powerhouse for studio colorists, 8K video timelines, and machine learning pipelines.",
+                stock: 5,
+                isPopular: true
+            },
+            {
+                id: "p4",
+                name: "Razer Blade 16 Dual-Mode Mini-LED",
+                category: "laptop",
+                categoryLabel: "PREMIUM LAPTOP",
+                price: 52900000,
+                originalPrice: 55000000,
+                tag: "DUAL DISPLAY MODE",
+                image: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    processor: "Intel Core i9-14900HX",
+                    gpu: "NVIDIA GeForce RTX 4080 12GB",
+                    ram: "32GB DDR5 5600MHz",
+                    storage: "2TB PCIe Gen4 SSD",
+                    display: "16\" Dual-Mode Mini-LED (4K 120Hz / FHD+ 240Hz)"
+                },
+                description: "World's first dual-mode Mini-LED screen allowing seamless switching between 4K color editing and high refresh esports frame rates.",
+                stock: 2,
+                isPopular: false
+            },
+
+            // Prebuilt Custom PC Rigs
+            {
+                id: "p5",
+                name: "ByteStore Apex CyberRig Mk-IV",
+                category: "prebuilt",
+                categoryLabel: "CUSTOM RIG",
+                price: 68500000,
+                originalPrice: 72000000,
+                tag: "CUSTOM WATERCOOLED",
+                image: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    processor: "Intel Core i9-14900KS (Special Edition)",
+                    gpu: "ASUS ROG Strix RTX 4090 24GB OC",
+                    ram: "64GB Corsair Dominator Titanium DDR5 7200MHz",
+                    chassis: "Lian Li O11 Vision Dual-Chamber CNC",
+                    cooling: "EKWB Custom Hardline Loop Liquid Cooling"
+                },
+                description: "Hand-assembled flagship workstation benchmarked for 72 hours under synthetic stress loops prior to white-glove dispatch.",
+                stock: 2,
+                isPopular: true
+            },
+            {
+                id: "p6",
+                name: "ByteStore Studio Station Threadripper",
+                category: "prebuilt",
+                categoryLabel: "STUDIO WORKSTATION",
+                price: 115000000,
+                originalPrice: 120000000,
+                tag: "64-CORE THREADRIPPER",
+                image: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    processor: "AMD Ryzen Threadripper PRO 7980X (64 Cores)",
+                    gpu: "Dual NVIDIA RTX 6000 Ada Generation 48GB",
+                    ram: "256GB ECC Registered DDR5",
+                    storage: "8TB Gen5 NVMe Array RAID-0",
+                    power: "Seasonic PRIME 1600W Titanium PSU"
+                },
+                description: "Industrial-grade computing node tailored for AI model fine-tuning, complex CAD simulations, and Hollywood VFX rendering pipelines.",
+                stock: 1,
+                isPopular: false
+            },
+
+            // Displays & Monitors
+            {
+                id: "p7",
+                name: "Samsung Odyssey OLED G8 34\"",
+                category: "monitor",
+                categoryLabel: "OLED DISPLAY",
+                price: 18499000,
+                originalPrice: 19999000,
+                tag: "ULTRAWIDE",
+                image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    panel: "Quantum Dot OLED Curved 175Hz",
+                    resolution: "UWQHD (3440 x 1440)",
+                    responseTime: "0.03ms (GtG)",
+                    features: "DisplayHDR True Black 400, USB-C 65W",
+                    guarantee: "Official Samsung 3 Year Warranty"
+                },
+                description: "34-inch curved QD-OLED display delivering absolute pitch black levels and 0.03ms GTG response times for color-critical studio editing.",
+                stock: 3,
+                isPopular: true
+            },
+            {
+                id: "p8",
+                name: "ASUS ROG Swift OLED PG32UCDM",
+                category: "monitor",
+                categoryLabel: "4K OLED DISPLAY",
+                price: 24900000,
+                originalPrice: 26500000,
+                tag: "4K 240HZ OLED",
+                image: "https://images.unsplash.com/photo-1547082299-de196ea013d6?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    panel: "32\" QD-OLED Gen 3 Anti-Reflection",
+                    resolution: "4K UHD (3840 x 2160) 240Hz",
+                    cooling: "Custom Graphene Film Heatsink",
+                    connectivity: "HDMI 2.1, DisplayPort 1.4, USB-C PD 90W"
+                },
+                description: "32-inch 4K QD-OLED panel running at 240Hz with custom passive cooling heatsinks to eliminate fan noise and prevent image burn-in.",
+                stock: 4,
+                isPopular: true
+            },
+            {
+                id: "p9",
+                name: "LG UltraGear 27GS95QE OLED",
+                category: "monitor",
+                categoryLabel: "ESPORTS MONITOR",
+                price: 14200000,
+                originalPrice: 15500000,
+                tag: "240HZ 0.03MS",
+                image: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    panel: "27\" QHD OLED Anti-Glare",
+                    resolution: "QHD (2560 x 1440) 240Hz",
+                    sync: "NVIDIA G-Sync & AMD FreeSync Premium Pro",
+                    gamut: "DCI-P3 98.5% Color Calibration"
+                },
+                description: "Tournament esports monitor engineered for instantaneous pixel transitions and zero blur motion clarity.",
+                stock: 6,
+                isPopular: false
+            },
+
+            // Mechanical Keyboards & Input
+            {
+                id: "p10",
+                name: "Keychron Q1 Max Tri-Mode Custom",
+                category: "keyboard",
+                categoryLabel: "CUSTOM KEYBOARD",
+                price: 3250000,
+                originalPrice: 3500000,
+                tag: "GASKET MOUNT",
+                image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    layout: "75% Compact Gasket Mount",
+                    switches: "Gateron Jupiter Banana (Hot-swappable)",
+                    connectivity: "Tri-Mode 2.4GHz / Bluetooth 5.1 / Type-C",
+                    case: "Full Aluminum CNC Anodized",
+                    battery: "4000mAh Battery"
+                },
+                description: "Full CNC acoustic anodized aluminum mechanical keyboard with multi-layer acoustic dampening foam and 1000Hz polling rate wireless connectivity.",
+                stock: 12,
+                isPopular: false
+            },
+            {
+                id: "p11",
+                name: "Wooting 60HE+ Hall Effect Analog Keyboard",
+                category: "keyboard",
+                categoryLabel: "ANALOG MAGNETIC",
+                price: 4100000,
+                originalPrice: 4400000,
+                tag: "RAPID TRIGGER",
+                image: "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    switches: "Lekker Magnetic Hall Effect Switches",
+                    actuation: "0.1mm to 4.0mm Adjustable Actuation",
+                    latency: "0.1ms Ultra Low Latency Tachyon Mode",
+                    keycaps: "Double-shot PBT Keycaps"
+                },
+                description: "Precision magnetic hall effect switches enabling rapid trigger reset points and per-key variable stroke actuation sensitivity.",
+                stock: 8,
+                isPopular: true
+            },
+
+            // Precision Mice
+            {
+                id: "p12",
+                name: "Logitech G Pro X Superlight 2",
+                category: "mouse",
+                categoryLabel: "PRECISION MOUSE",
+                price: 2199000,
+                originalPrice: 2399000,
+                tag: "ESPORTS PRO",
+                image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    sensor: "HERO 2 (Up to 32,000 DPI)",
+                    weight: "60 gram Ultra Lightweight",
+                    switches: "LIGHTFORCE Hybrid Optical-Mechanical",
+                    pollingRate: "Up to 4000Hz Wireless",
+                    battery: "Up to 95 Hours"
+                },
+                description: "Tournament-grade esports precision wireless mouse featuring 60-gram weight distribution and Lightforce optical-mechanical switches.",
+                stock: 15,
+                isPopular: true
+            },
+            {
+                id: "p13",
+                name: "Razer Viper V3 Pro Wireless",
+                category: "mouse",
+                categoryLabel: "LIGHTWEIGHT MOUSE",
+                price: 2450000,
+                originalPrice: 2690000,
+                tag: "8000HZ POLLING",
+                image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    sensor: "Focus Pro 35K Optical Sensor Gen-2",
+                    weight: "54 Gram Symmetrical Frame",
+                    pollingRate: "True 8000Hz HyperPolling",
+                    battery: "95 Hours Continuous Play"
+                },
+                description: "54-gram hyper-light symmetrical frame calibrated in partnership with world champion CS2 and Valorant esports professionals.",
+                stock: 9,
+                isPopular: false
+            },
+
+            // Audio & Stream Peripherals
+            {
+                id: "p14",
+                name: "SteelSeries Arctis Nova Pro Wireless",
+                category: "peripherals",
+                categoryLabel: "STUDIO AUDIO",
+                price: 5800000,
+                originalPrice: 6200000,
+                tag: "DUAL BATTERY DAC",
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    drivers: "40mm Premium High Resolution Drivers",
+                    anc: "Active Noise Cancellation with Transparency Mode",
+                    dac: "Base Station OLED Wireless Transceiver with Dual USB",
+                    power: "Swappable Dual Battery System"
+                },
+                description: "High-resolution wireless audio system featuring multi-system USB audio switching, active noise cancellation, and hot-swappable batteries.",
+                stock: 6,
+                isPopular: true
+            },
+            {
+                id: "p15",
+                name: "Elgato Stream Deck MK.2 Studio Console",
+                category: "peripherals",
+                categoryLabel: "STUDIO HARDWARE",
+                price: 2350000,
+                originalPrice: 2500000,
+                tag: "15 MACRO KEYS",
+                image: "https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    keys: "15 Customizable LCD Keys",
+                    interface: "USB 2.0 High Speed",
+                    plugins: "OBS Studio, Twitch, Photoshop, CAD Macros",
+                    stand: "Detachable 45° Angle Desktop Stand"
+                },
+                description: "Direct tactile studio controller for triggering automated macro commands, audio routing, lighting presets, and livestream scene transitions.",
+                stock: 11,
+                isPopular: false
+            },
+
+            // Storage & High-Speed Memory
+            {
+                id: "p16",
+                name: "Samsung 990 PRO NVMe M.2 2TB",
+                category: "storage",
+                categoryLabel: "SSD STORAGE",
+                price: 2850000,
+                originalPrice: 3100000,
+                tag: "GEN4 NVME",
+                image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    interface: "PCIe Gen 4.0 x4, NVMe 2.0",
+                    readSpeed: "Up to 7,450 MB/s Read",
+                    writeSpeed: "Up to 6,900 MB/s Write",
+                    formFactor: "M.2 2280 with Heatsink RGB",
+                    warranty: "Official 5 Year Warranty"
+                },
+                description: "High-throughput Gen4 NVMe solid state drive engineered for instantaneous game loading and raw 8K video scrubbing.",
+                stock: 20,
+                isPopular: false
+            },
+            {
+                id: "p17",
+                name: "WD Black SN850X 4TB NVMe SSD",
+                category: "storage",
+                categoryLabel: "HIGH CAPACITY SSD",
+                price: 5200000,
+                originalPrice: 5600000,
+                tag: "4TB EXTREME",
+                image: "https://images.unsplash.com/photo-1563770660941-20978e870e26?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    capacity: "4000 GB NVMe Storage",
+                    readSpeed: "7300 MB/s Read Speed",
+                    cache: "Game Mode 2.0 Predictive Loading",
+                    warranty: "5 Year Official Western Digital Warranty"
+                },
+                description: "Massive 4TB solid state drive engineered to store dense project libraries, 3D raw render caches, and large software suites.",
+                stock: 7,
+                isPopular: false
+            },
+
+            // GPU & Core Components
+            {
+                id: "p18",
+                name: "ROG Strix RTX 4080 Super 16GB",
+                category: "component",
+                categoryLabel: "GRAPHICS HARDWARE",
+                price: 22900000,
+                originalPrice: 24500000,
+                tag: "EXTREME GPU",
+                image: "https://images.unsplash.com/photo-1591488320449-011701bb6704?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    vram: "16GB GDDR6X 256-bit",
+                    cooling: "Patented Vapor Chamber & Axial-tech Fans",
+                    power: "16-pin PCIe 5.0 (Power Suggested 850W)",
+                    rgb: "Aura Sync Addressable RGB",
+                    size: "3.5 Slot Design"
+                },
+                description: "Vapor chamber cooled high-end graphics accelerator designed for uncompromised 4K ray-traced rendering and local LLM acceleration.",
+                stock: 3,
+                isPopular: true
+            },
+            {
+                id: "p19",
+                name: "Intel Core i9-14900K Processor",
+                category: "component",
+                categoryLabel: "FLAGSHIP CPU",
+                price: 9800000,
+                originalPrice: 10500000,
+                tag: "24-CORE CPU",
+                image: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    cores: "24 Cores (8 P-Cores + 16 E-Cores)",
+                    threads: "32 Threads",
+                    maxClock: "Up to 6.0 GHz Max Turbo Frequency",
+                    socket: "LGA 1700 (Intel 600 & 700 Series Motherboards)"
+                },
+                description: "Unlocked desktop microprocessor engineered with Thermal Velocity Boost delivering 6.0 GHz out-of-the-box clock frequencies.",
+                stock: 14,
+                isPopular: false
+            },
+            {
+                id: "p20",
+                name: "Corsair Dominator Titanium DDR5 64GB",
+                category: "component",
+                categoryLabel: "HIGH-SPEED RAM",
+                price: 4850000,
+                originalPrice: 5200000,
+                tag: "7200MHZ CL34",
+                image: "https://images.unsplash.com/photo-1562976540-1502c2145186?q=80&w=800&auto=format&fit=crop",
+                specs: {
+                    capacity: "64GB Kit (2 x 32GB)",
+                    speed: "DDR5 7200MHz CL34",
+                    topBar: "Customizable Replaceable Top Heatspreader Bar",
+                    profile: "Intel XMP 3.0 & AMD EXPO Ready"
+                },
+                description: "Precision-machined forged aluminum memory modules running ultra-tight CL34 timings for high bandwidth computing workloads.",
+                stock: 10,
+                isPopular: false
+            }
+        ];
+
+        // Categories Map
+        const CATEGORIES = [
+            { id: "all", label: "00 // ALL HARDWARE" },
+            { id: "laptop", label: "01 // WORKSTATION LAPTOPS" },
+            { id: "prebuilt", label: "02 // PREBUILT CUSTOM RIGS" },
+            { id: "monitor", label: "03 // OLED & PRO DISPLAYS" },
+            { id: "keyboard", label: "04 // MECHANICAL KEYBOARDS" },
+            { id: "mouse", label: "05 // PRECISION MICE" },
+            { id: "peripherals", label: "06 // AUDIO & STUDIO GEAR" },
+            { id: "storage", label: "07 // NVME STORAGE" },
+            { id: "component", label: "08 // GPU & CORE COMPONENTS" }
+        ];
+
+        // Anatomy Hotspots Dataset
+        const HOTSPOTS_DATA = {
+            hotspot1: {
+                code: "COMPONENT // 01",
+                title: "VAPOR CHAMBER LIQUID COOLING",
+                desc: "Patented dual-phase liquid evaporation chamber dissipating thermal pressure up to 450W TDP, sustaining peak boost clock speeds during extended computational workloads.",
+                param1: "99.9% Electrolytic Copper",
+                param2: "14.8 W/m-K Conductive",
+                param3: "±0.005mm CNC Machined"
+            },
+            hotspot2: {
+                code: "COMPONENT // 02",
+                title: "NVIDIA RTX ADALOVELACE CORE",
+                desc: "10,240 CUDA Cores coupled with 3rd-Gen RT Cores and 4th-Gen Tensor Cores executing real-time AI frame interpolation and raytracing matrix algebra.",
+                param1: "TSMC 4N Custom Process",
+                param2: "45.9 Billion Transistors",
+                param3: "2550 MHz Boost Clock"
+            },
+            hotspot3: {
+                code: "COMPONENT // 03",
+                title: "DDR5 HIGH-SPEED POWER BUS",
+                desc: "10-layer server-grade PCB layout with direct digital power stages delivering clean, ripple-free voltage for maximum RAM overclocking stability.",
+                param1: "Server-Grade 10-Layer PCB",
+                param2: "6000MHz CL30 Profile",
+                param3: "Intel XMP 3.0 Ready"
+            }
+        };
+
+        // Application State
+        let currentCategory = "all";
+        let searchQuery = "";
+        let currentSort = "featured";
+        let buildList = [];
+
+        // Three.js State Variables
+        let scene, camera, renderer, rigGroup, isExploded = false, isWireframe = false;
+
+        // Initialize Application on DOM Ready
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCategoryPills();
+            renderProducts();
+            updateBuildBadge();
+            initThreeJSExhibition();
+
+            // Re-initialize Lucide Icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Keyboard listeners for escape modals
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    closeModal();
+                    closeBuildDrawer();
+                }
+            });
+        });
+
+        // THREE.JS 3D HERO EXHIBITION CANVAS ENGINE
+        function initThreeJSExhibition() {
+            const container = document.getElementById("threeHeroCanvas");
+            if (!container) return;
+
+            // Scene Setup
+            scene = new THREE.Scene();
+            
+            // Camera Setup
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 3, 12);
+
+            // Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting Setup (Studio Metallic Lighting)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(10, 20, 15);
+            scene.add(mainLight);
+
+            const cobaltAccentLight = new THREE.PointLight(0x294DFF, 2, 20);
+            cobaltAccentLight.position.set(-5, 2, 5);
+            scene.add(cobaltAccentLight);
+
+            // Construct Procedural 3D Mechanical Rig Group
+            rigGroup = new THREE.Group();
+
+            // Base Chassis Frame (Aluminum Block)
+            const chassisGeo = new THREE.BoxGeometry(6, 0.6, 4);
+            const chassisMat = new THREE.MeshStandardMaterial({ color: 0x1A1C20, metalness: 0.8, roughness: 0.2 });
+            const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+            chassis.position.y = -0.3;
+            rigGroup.add(chassis);
+
+            // GPU Block Layer (Cobalt Accent Metal)
+            const gpuGeo = new THREE.BoxGeometry(4.5, 0.8, 2.5);
+            const gpuMat = new THREE.MeshStandardMaterial({ color: 0x294DFF, metalness: 0.9, roughness: 0.1 });
+            const gpuBlock = new THREE.Mesh(gpuGeo, gpuMat);
+            gpuBlock.position.y = 0.5;
+            gpuBlock.name = "gpuLayer";
+            rigGroup.add(gpuBlock);
+
+            // Cooling Fins Array
+            for (let i = -1.8; i <= 1.8; i += 0.4) {
+                const finGeo = new THREE.BoxGeometry(0.1, 0.7, 2.2);
+                const finMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9, roughness: 0.3 });
+                const fin = new THREE.Mesh(finGeo, finMat);
+                fin.position.set(i, 1.3, 0);
+                fin.name = "fanFin";
+                rigGroup.add(fin);
+            }
+
+            // Top Acrylic Plate
+            const acrylicGeo = new THREE.BoxGeometry(5.2, 0.1, 3.2);
+            const acrylicMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, roughness: 0.05 });
+            const acrylic = new THREE.Mesh(acrylicGeo, acrylicMat);
+            acrylic.position.y = 1.8;
+            acrylic.name = "acrylicTop";
+            rigGroup.add(acrylic);
+
+            scene.add(rigGroup);
+
+            // Mouse Pointer Interaction Parallax
+            let mouseX = 0, mouseY = 0;
+            container.addEventListener("mousemove", (e) => {
+                const rect = container.getBoundingClientRect();
+                mouseX = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
+                mouseY = -(((e.clientY - rect.top) / container.clientHeight) * 2 - 1);
+            });
+
+            // Window Resize Handler
+            window.addEventListener("resize", () => {
+                if (!container) return;
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            // Animation Render Loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Idle Rotation & Mouse Parallax Smooth Interpolation
+                rigGroup.rotation.y += 0.005;
+                rigGroup.rotation.x = mouseY * 0.3;
+                rigGroup.rotation.z = mouseX * 0.2;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        // Toggle 3D Exploded Assembly Animation
+        function toggle3DExplode() {
+            if (!rigGroup) return;
+            isExploded = !isExploded;
+
+            const btn = document.getElementById("toggleExplodeBtn");
+
+            rigGroup.children.forEach(child => {
+                if (child.name === "gpuLayer") {
+                    child.position.y = isExploded ? 1.8 : 0.5;
+                }
+                if (child.name === "acrylicTop") {
+                    child.position.y = isExploded ? 3.2 : 1.8;
+                }
+            });
+
+            if (btn) {
+                btn.innerText = isExploded ? "COLLAPSE ASSEMBLY" : "EXPLODE ASSEMBLY";
+            }
+        }
+
+        // Toggle 3D Wireframe Render Mode
+        function toggle3DWireframe() {
+            if (!rigGroup) return;
+            isWireframe = !isWireframe;
+
+            rigGroup.children.forEach(child => {
+                if (child.material) {
+                    child.material.wireframe = isWireframe;
+                }
+            });
+        }
+
+        // Format IDR Currency
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Render Category Filter Pills
+        function renderCategoryPills() {
+            const container = document.getElementById("categoryContainer");
+            container.innerHTML = CATEGORIES.map(cat => {
+                const isActive = currentCategory === cat.id;
+                return `
+                    <button onclick="selectCategory('${cat.id}')" 
+                            class="px-3.5 py-1.5 font-mono text-xs font-bold whitespace-nowrap transition-all border ${
+                                isActive 
+                                ? 'bg-cobalt text-white border-cobalt shadow-raw-cobalt' 
+                                : 'bg-bone-light text-obsidian border-obsidian/20 hover:border-obsidian'
+                            }">
+                        ${cat.label}
+                    </button>
+                `;
+            }).join("");
+        }
+
+        function selectCategory(catId) {
+            currentCategory = catId;
+            renderCategoryPills();
+            renderProducts();
+        }
+
+        // Search Handlers
+        function handleSearchInput() {
+            const input = document.getElementById("searchInput");
+            const clearBtn = document.getElementById("clearSearchBtn");
+            searchQuery = input.value.trim().toLowerCase();
+
+            if (searchQuery.length > 0) {
+                clearBtn.classList.remove("hidden");
+            } else {
+                clearBtn.classList.add("hidden");
+            }
+
+            renderProducts();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById("searchInput");
+            const clearBtn = document.getElementById("clearSearchBtn");
+            input.value = "";
+            searchQuery = "";
+            clearBtn.classList.add("hidden");
+            renderProducts();
+        }
+
+        function handleSortChange() {
+            currentSort = document.getElementById("sortSelect").value;
+            renderProducts();
+        }
+
+        function resetFilters() {
+            currentCategory = "all";
+            clearSearch();
+            currentSort = "featured";
+            document.getElementById("sortSelect").value = "featured";
+            renderCategoryPills();
+            renderProducts();
+        }
+
+        // Get Filtered Product List
+        function getFilteredProducts() {
+            return PRODUCTS_DATA.filter(product => {
+                const matchesCategory = currentCategory === "all" || product.category === currentCategory;
+                const matchesSearch = searchQuery === "" || 
+                    product.name.toLowerCase().includes(searchQuery) ||
+                    product.categoryLabel.toLowerCase().includes(searchQuery) ||
+                    Object.values(product.specs).some(val => val.toLowerCase().includes(searchQuery));
+
+                return matchesCategory && matchesSearch;
+            }).sort((a, b) => {
+                if (currentSort === "price-asc") return a.price - b.price;
+                if (currentSort === "price-desc") return b.price - a.price;
+                if (currentSort === "name-asc") return a.name.localeCompare(b.name);
+                return b.isPopular - a.isPopular;
+            });
+        }
+
+        // Render Catalogue Product Grid
+        function renderProducts() {
+            const grid = document.getElementById("productGrid");
+            const emptyState = document.getElementById("emptyState");
+            const countDisplay = document.getElementById("productCount");
+            const activeFilterBadge = document.getElementById("activeFilterBadge");
+
+            const filtered = getFilteredProducts();
+            countDisplay.innerText = filtered.length;
+
+            if (currentCategory !== "all" || searchQuery !== "") {
+                activeFilterBadge.classList.remove("hidden");
+                activeFilterBadge.innerText = `[ FILTER: ${currentCategory.toUpperCase()} ]`;
+            } else {
+                activeFilterBadge.classList.add("hidden");
+            }
+
+            if (filtered.length === 0) {
+                grid.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+            grid.classList.remove("hidden");
+
+            grid.innerHTML = filtered.map((product, idx) => {
+                return `
+                    <div class="group bg-bone-card border border-obsidian/20 hover:border-cobalt transition-all duration-300 flex flex-col justify-between overflow-hidden relative shadow-subtle-depth">
+                        
+                        <!-- Top Metadata Bar -->
+                        <div class="p-4 border-b border-obsidian/10 flex items-center justify-between font-mono text-[10px] text-obsidian/60 bg-bone-light">
+                            <span>REF // 00${idx + 1}</span>
+                            <span class="text-cobalt font-bold">${product.categoryLabel}</span>
+                        </div>
+
+                        <!-- Product Image Container -->
+                        <div class="img-mask-container h-56 bg-obsidian/5 flex items-center justify-center p-4 relative">
+                            <img src="${product.image}" 
+                                 alt="${product.name}" 
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1587202372775-e229f172b9d7?q=80&w=800&auto=format&fit=crop';"
+                                 class="w-full h-full object-cover">
+                            
+                            <span class="absolute top-3 right-3 px-2 py-0.5 bg-obsidian text-bone font-mono text-[9px] font-bold">
+                                ${product.tag}
+                            </span>
+                        </div>
+
+                        <!-- Product Title & Spec Highlights -->
+                        <div class="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <h3 class="font-display font-bold text-lg text-obsidian group-hover:text-cobalt transition-colors line-clamp-1">
+                                    ${product.name}
+                                </h3>
+                                <p class="font-mono text-xs text-obsidian/60 line-clamp-2 bg-bone-light p-2 border border-obsidian/10">
+                                    ${Object.values(product.specs)[0]} &bull; ${Object.values(product.specs)[1] || ''}
+                                </p>
+                            </div>
+
+                            <!-- Pricing & Action Row -->
+                            <div class="pt-4 border-t border-obsidian/10 flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block font-mono text-[10px] text-obsidian/40 uppercase">PRICE</span>
+                                    <span class="font-mono font-bold text-base text-obsidian">${formatRupiah(product.price)}</span>
+                                </div>
+
+                                <div class="flex gap-1.5">
+                                    <button onclick="openModal('${product.id}')" 
+                                            class="px-3 py-2 bg-bone-light hover:bg-obsidian hover:text-bone text-obsidian font-mono text-xs font-bold border border-obsidian/20 transition-colors" title="Inspect Product Specs">
+                                        SPEC
+                                    </button>
+
+                                    <button onclick="addToBuild('${product.id}')" 
+                                            class="px-3 py-2 bg-cobalt hover:bg-obsidian text-white font-mono text-xs font-bold transition-colors" title="Add to Custom Rig List">
+                                        + RIG
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+            }).join("");
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Inspect Anatomy Hotspots
+        function inspectHotspot(hotspotKey) {
+            const data = HOTSPOTS_DATA[hotspotKey];
+            if (!data) return;
+
+            document.getElementById("hotspotCode").innerText = data.code;
+            document.getElementById("hotspotTitle").innerText = data.title;
+            document.getElementById("hotspotDesc").innerText = data.desc;
+            document.getElementById("hotspotParam1").innerText = data.param1;
+            document.getElementById("hotspotParam2").innerText = data.param2;
+            document.getElementById("hotspotParam3").innerText = data.param3;
+        }
+
+        // Product Detail Modal Popup
+        function openModal(productId) {
+            const product = PRODUCTS_DATA.find(p => p.id === productId);
+            if (!product) return;
+
+            const modal = document.getElementById("productModal");
+            const modalContainer = document.getElementById("modalContainer");
+            const modalBody = document.getElementById("modalBody");
+
+            const waMessage = encodeURIComponent(
+                `Halo ByteStore, saya berminat memesan/tanya stok untuk hardware:\n\n` +
+                `*${product.name}*\n` +
+                `Harga: ${formatRupiah(product.price)}\n\n` +
+                `Mohon info ketersediaan & pengiriman. Terima kasih!`
+            );
+            const waLink = `https://wa.me/${CONFIG.whatsappNumber}?text=${waMessage}`;
+
+            modalBody.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    
+                    <div class="space-y-4">
+                        <div class="border border-obsidian/20 bg-obsidian/5 h-64 sm:h-80 overflow-hidden">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex items-center justify-between font-mono text-xs text-obsidian/60 bg-bone-dark p-2 border border-obsidian/10">
+                            <span>STOCK STATUS: <strong class="text-cobalt font-bold">READY (${product.stock} UNITS)</strong></span>
+                            <span>OFFICIAL WARRANTY</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <span class="font-mono text-xs font-bold text-cobalt uppercase tracking-widest">${product.categoryLabel}</span>
+                            <h2 class="font-display font-bold text-2xl text-obsidian mt-1">${product.name}</h2>
+                            <p class="font-mono text-2xl font-bold text-obsidian mt-2">${formatRupiah(product.price)}</p>
+                        </div>
+
+                        <p class="font-mono text-xs text-obsidian/70 leading-relaxed bg-bone-light p-4 border border-obsidian/10">
+                            ${product.description}
+                        </p>
+
+                        <div class="space-y-2 font-mono text-xs">
+                            <h4 class="font-bold text-obsidian uppercase">TECHNICAL SPECIFICATIONS:</h4>
+                            <div class="bg-bone-light border border-obsidian/15 p-4 space-y-2">
+                                ${Object.entries(product.specs).map(([key, value]) => `
+                                    <div class="flex justify-between border-b border-obsidian/10 pb-1.5 last:border-0 last:pb-0">
+                                        <span class="text-obsidian/50 capitalize">${key}:</span>
+                                        <span class="text-obsidian font-bold text-right pl-2">${value}</span>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                            <a href="${waLink}" target="_blank" rel="noopener noreferrer" 
+                               class="flex-1 py-3.5 px-4 bg-cobalt hover:bg-obsidian text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                                ORDER VIA WHATSAPP
+                            </a>
+
+                            <button onclick="addToBuild('${product.id}'); closeModal();" 
+                                    class="py-3.5 px-4 bg-bone-dark hover:bg-obsidian hover:text-bone text-obsidian font-mono font-bold text-xs border border-obsidian/30 transition-colors">
+                                + ADD TO RIG
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                modal.classList.remove("opacity-0");
+                modalContainer.classList.remove("scale-95");
+            }, 10);
+
+            document.body.style.overflow = "hidden";
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById("productModal");
+            const modalContainer = document.getElementById("modalContainer");
+
+            modal.classList.add("opacity-0");
+            modalContainer.classList.add("scale-95");
+
+            setTimeout(() => {
+                modal.classList.add("hidden");
+                document.body.style.overflow = "auto";
+            }, 300);
+        }
+
+        function handleModalBackdropClick(event) {
+            if (event.target.id === "productModal") closeModal();
+        }
+
+        // BUILD ESTIMATOR DRAWER FUNCTIONS
+        function toggleBuildDrawer() {
+            const drawer = document.getElementById("buildDrawer");
+            const container = document.getElementById("drawerContainer");
+
+            if (drawer.classList.contains("hidden")) {
+                renderBuildDrawerItems();
+                drawer.classList.remove("hidden");
+                setTimeout(() => {
+                    drawer.classList.remove("opacity-0");
+                    container.classList.remove("translate-x-full");
+                }, 10);
+                document.body.style.overflow = "hidden";
+            } else {
+                closeBuildDrawer();
+            }
+        }
+
+        function closeBuildDrawer() {
+            const drawer = document.getElementById("buildDrawer");
+            const container = document.getElementById("drawerContainer");
+
+            drawer.classList.add("opacity-0");
+            container.classList.add("translate-x-full");
+
+            setTimeout(() => {
+                drawer.classList.add("hidden");
+                document.body.style.overflow = "auto";
+            }, 300);
+        }
+
+        function handleDrawerBackdropClick(event) {
+            if (event.target.id === "buildDrawer") closeBuildDrawer();
+        }
+
+        function addToBuild(productId) {
+            const product = PRODUCTS_DATA.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingIndex = buildList.findIndex(item => item.id === productId);
+            if (existingIndex > -1) {
+                buildList[existingIndex].qty += 1;
+            } else {
+                buildList.push({ ...product, qty: 1 });
+            }
+
+            updateBuildBadge();
+            showToast(`[ ADDED ] ${product.name} TO RIG LIST`);
+        }
+
+        function updateBuildBadge() {
+            const badge = document.getElementById("rigCounterBadge");
+            const totalQty = buildList.reduce((acc, item) => acc + item.qty, 0);
+            badge.innerText = totalQty;
+        }
+
+        function removeFromBuild(productId) {
+            buildList = buildList.filter(item => item.id !== productId);
+            updateBuildBadge();
+            renderBuildDrawerItems();
+        }
+
+        function updateBuildQty(productId, delta) {
+            const item = buildList.find(i => i.id === productId);
+            if (!item) return;
+
+            item.qty += delta;
+            if (item.qty <= 0) {
+                removeFromBuild(productId);
+            } else {
+                updateBuildBadge();
+                renderBuildDrawerItems();
+            }
+        }
+
+        function renderBuildDrawerItems() {
+            const container = document.getElementById("buildListItems");
+            const totalPriceEl = document.getElementById("buildTotalPrice");
+            const checkoutBtn = document.getElementById("checkoutBuildBtn");
+
+            if (buildList.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 space-y-3 font-mono">
+                        <i data-lucide="cpu" class="w-10 h-10 text-obsidian/30 mx-auto"></i>
+                        <p class="text-obsidian/60 text-xs">YOUR CUSTOM RIG LIST IS EMPTY.</p>
+                        <p class="text-[10px] text-obsidian/40">Select "+ RIG" on hardware items to compile cost estimate.</p>
+                    </div>
+                `;
+                totalPriceEl.innerText = formatRupiah(0);
+                checkoutBtn.disabled = true;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            checkoutBtn.disabled = false;
+            let totalPrice = 0;
+
+            container.innerHTML = buildList.map(item => {
+                const itemTotal = item.price * item.qty;
+                totalPrice += itemTotal;
+
+                return `
+                    <div class="p-3 bg-bone-card border border-obsidian/20 flex items-center justify-between gap-3 font-mono">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover border border-obsidian/20">
+                            <div>
+                                <h4 class="text-xs font-bold text-obsidian line-clamp-1">${item.name}</h4>
+                                <p class="text-xs text-cobalt font-bold">${formatRupiah(item.price)}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center border border-obsidian/30 bg-bone-light text-xs">
+                                <button onclick="updateBuildQty('${item.id}', -1)" class="px-2 py-1 hover:bg-obsidian hover:text-white">-</button>
+                                <span class="px-2 font-bold">${item.qty}</span>
+                                <button onclick="updateBuildQty('${item.id}', 1)" class="px-2 py-1 hover:bg-obsidian hover:text-white">+</button>
+                            </div>
+                            <button onclick="removeFromBuild('${item.id}')" class="p-1 text-obsidian/50 hover:text-red-600">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            totalPriceEl.innerText = formatRupiah(totalPrice);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // WhatsApp Order Dispatch
+        function sendBuildWhatsAppOrder() {
+            if (buildList.length === 0) return;
+
+            let itemsText = buildList.map((item, index) => {
+                return `${index + 1}. *${item.name}* (${item.qty}x) - ${formatRupiah(item.price * item.qty)}`;
+            }).join("\n");
+
+            let grandTotal = buildList.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            let message = encodeURIComponent(
+                `Halo ByteStore Labs, saya ingin memesan/konsultasi racikan PC berikut:\n\n` +
+                `${itemsText}\n\n` +
+                `*Total Estimasi:* ${formatRupiah(grandTotal)}\n\n` +
+                `Mohon informasi ketersediaan komponen & rekomendasi teknis. Terima kasih!`
+            );
+
+            window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${message}`, '_blank');
+        }
+
+        function openWhatsAppConsultation() {
+            let message = encodeURIComponent(`Halo ByteStore Labs, saya ingin berkonsultasi mengenai spesifikasi hardware & custom build workstation.`);
+            window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${message}`, '_blank');
+        }
+
+        function toggleMobileMenu() {
+            const dock = document.getElementById("mobileDock");
+            dock.classList.toggle("hidden");
+        }
+
+        // Toast Feedback Notification
+        function showToast(message) {
+            const toast = document.createElement("div");
+            toast.className = "fixed bottom-6 right-6 z-50 px-4 py-3 bg-obsidian text-bone font-mono font-bold text-xs shadow-2xl border border-cobalt flex items-center gap-2 transform transition-all duration-300 translate-y-10 opacity-0";
+            toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-cobalt"></span> ${message}`;
+            
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove("translate-y-10", "opacity-0");
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
